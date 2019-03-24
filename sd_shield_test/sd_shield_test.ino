@@ -1,43 +1,42 @@
- /////////////////////////////////////////////////////////////////
-   //              Arduino SD Card Tutorial     v1.00             //
-  //       Get the latest version of the code here:              //
- //         http://educ8s.tv/arduino-sd-card-tutorial           //
-/////////////////////////////////////////////////////////////////
 #include <SD.h>
 #include <SPI.h>
 #include <DS1302.h>
-#include <Wire.h>  
+#include <Wire.h>
+#include<String.h>
 
 DS1302 rtc(2, 3, 4);
 
 int CS_PIN = 10;
 File file;
-unsigned long main_clock;
+String main_clock;
+
 
 void setup()
 {
-    // Set the clock to run-mode, and disable the write protection
+  // Set the clock to run-mode, and disable the write protection
   rtc.halt(false);
   rtc.writeProtect(false);
   // The following lines can be commented out to use the values already stored in the DS1302
-//rtc.setDOW(WEDNESDAY);        // Set Day-of-Week to FRIDAY
-//rtc.setTime(16, 7, 0);     // Set the time to 12:00:00 (24hr format)
-//rtc.setDate(27, 1, 2016);   // Set the date to August 6th, 2010
+  //rtc.setDOW(WEDNESDAY);        // Set Day-of-Week to FRIDAY
+  //rtc.setTime(16, 7, 0);     // Set the time to 12:00:00 (24hr format)
+  //rtc.setDate(27, 1, 2016);   // Set the date to August 6th, 2010
 
   Serial.begin(9600);
   initializeSD();
   createFile("timelog.txt");
-  
+
   writeToFile("This is a time log!");
 
   int i;
 
-  for(i=0;i<10;i++)
+  for (i = 0; i < 10; i++)
   {
     writeToFile(rtc.getTimeStr());
+    main_clock=String(millis());
+    writeToFile(main_clock);
     delay(1000);
   }
-  
+
   closeFile();
 }
 
@@ -45,10 +44,10 @@ void loop()
 {
   // Display time
   //lcd.print(rtc.getTimeStr());
-  
+
   // Display abbreviated Day-of-Week in the lower left corner
   //lcd.print(rtc.getDOWStr(FORMAT_SHORT));
-  
+
   // Display date in the lower right corner
   //lcd.print(rtc.getDateStr());
 
@@ -84,13 +83,14 @@ int createFile(char filename[])
   }
 }
 
-int writeToFile(char text[])
+int writeToFile(String text)
 {
   if (file)
   {
     file.println(text);
     Serial.println("Writing to file: ");
     Serial.println(text);
+    Serial.println(millis());
     return 1;
   } else
   {
